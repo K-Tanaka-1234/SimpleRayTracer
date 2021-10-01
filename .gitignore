@@ -55,3 +55,5 @@ dkms.conf
 /x64/
 /SimpleRayTracer/x64/
 /TestApp/x64/
+
+*.mp4
