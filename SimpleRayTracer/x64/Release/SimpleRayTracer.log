@@ -1,8 +1,0 @@
-﻿  renderer.c
-     ライブラリ C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Release\SimpleRayTracer.lib とオブジェクト C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Release\SimpleRayTracer.exp を作成中
-  コード生成しています。
-  2 of 73 functions ( 2.7%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
-  コード生成が終了しました。
-  SimpleRayTracer.vcxproj -> C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Release\SimpleRayTracer.dll
