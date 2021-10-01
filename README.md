@@ -1,2 +1,1 @@
-# SimpleRayTracer
- 
+SimpleRayTracer

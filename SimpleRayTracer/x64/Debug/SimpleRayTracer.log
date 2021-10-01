@@ -1,0 +1,10 @@
+﻿  BVH.c
+  camera.c
+  material.c
+  objects.c
+  parametric_objects.c
+  renderer.c
+  simple_ray_tracer.c
+  コードを生成中...
+     ライブラリ C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Debug\SimpleRayTracer.lib とオブジェクト C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Debug\SimpleRayTracer.exp を作成中
+  SimpleRayTracer.vcxproj -> C:\Users\kouhei\source\repos\SimpleRayTracer\x64\Debug\SimpleRayTracer.dll
