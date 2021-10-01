@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#include <windows.h>
 #include "simple_ray_tracer.h"
 
 #include "renderer.h"
@@ -14,7 +14,10 @@
 #include "material.h"
 #include "texture.h"
 
+#define NUM_THREADS 12
+
 static camera cam;
+static renderer_config r_conf_t;
 obj_list objects;
 
 void _renderer_init(int screen_rows, int screen_cols, int channels)
@@ -43,32 +46,53 @@ color3 calc_color(camera *cam, ray r, obj_list *list, int depth, color3 backgrou
 	return emitted;
 }
 
+void rendering_line(void *arg)
+{
+	int i = *(int *)arg;
+
+	for (int j = 0; j < r_conf_t.rendering_width; j++)
+	{
+		color3 c = zerosv3();
+
+		for (int k = 0; k < r_conf_t.num_samples; k++)
+		{
+			double v = ((double)i + random_double()) / (r_conf_t.rendering_height - 1);
+			double u = ((double)j + random_double()) / (r_conf_t.rendering_width - 1);
+
+			ray r = camera_get_ray(&cam, u, v);
+
+			c = addv(c, calc_color(&cam, r, &objects, r_conf_t.ray_max_depth, r_conf_t.background));
+		}
+		c = sqrtv(divv(r_conf_t.num_samples, c));
+
+		g_frame_buffer[((r_conf_t.rendering_height - 1 - i)*r_conf_t.rendering_width + j)*r_conf_t.num_channels + 0] = (unsigned char)(255.0*c.e[2]);
+		g_frame_buffer[((r_conf_t.rendering_height - 1 - i)*r_conf_t.rendering_width + j)*r_conf_t.num_channels + 1] = (unsigned char)(255.0*c.e[1]);
+		g_frame_buffer[((r_conf_t.rendering_height - 1 - i)*r_conf_t.rendering_width + j)*r_conf_t.num_channels + 2] = (unsigned char)(255.0*c.e[0]);
+	}
+}
+
 void _run_renderer(renderer_config r_conf, camera_config c_conf)
 {
+	r_conf_t = r_conf;
+
+	HANDLE handle[NUM_THREADS];
+	int i[NUM_THREADS];
+
 	camera_init(&cam, r_conf, c_conf);
 
-	for (int i = 0; i < r_conf.rendering_height; i++)
+	for (int t = 0; t < r_conf.rendering_height / NUM_THREADS + 1; t++)
 	{
-		for (int j = 0; j < r_conf.rendering_width; j++)
+		int tmp = ((t + 1)*NUM_THREADS > r_conf.rendering_height) ? r_conf.rendering_height - t*NUM_THREADS : NUM_THREADS;
+		
+		for (int s = 0; s < tmp; s++) 
 		{
-			color3 c = zerosv3();
-
-			for (int k = 0; k < r_conf.num_samples; k++)
-			{
-				double v = ((double)i + random_double()) / (r_conf.rendering_height - 1);
-				double u = ((double)j + random_double()) / (r_conf.rendering_width - 1);
-
-				ray r = camera_get_ray(&cam, u, v);
-				
-				c = addv(c, calc_color(&cam, r, &objects, r_conf.ray_max_depth, r_conf.background));
-			}
-			c = sqrtv(divv(r_conf.num_samples, c));
-
-			g_frame_buffer[((r_conf.rendering_height - 1 - i)*r_conf.rendering_width + j)*r_conf.num_channels + 0] = (unsigned char)(255.0*c.e[2]);
-			g_frame_buffer[((r_conf.rendering_height - 1 - i)*r_conf.rendering_width + j)*r_conf.num_channels + 1] = (unsigned char)(255.0*c.e[1]);
-			g_frame_buffer[((r_conf.rendering_height - 1 - i)*r_conf.rendering_width + j)*r_conf.num_channels + 2] = (unsigned char)(255.0*c.e[0]);
+			i[s] = t * NUM_THREADS + s;
+			handle[s] = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)rendering_line, &i[s], 0, NULL);
 		}
-		//printf("%lf\n", (double)i / (double)(r_conf.rendering_height - 1));
+
+		WaitForMultipleObjects(NUM_THREADS,	handle, TRUE, INFINITE);
+		
+		for(int s = 0;s < tmp;s++) CloseHandle(handle[s]);
 	}
 
 	return;

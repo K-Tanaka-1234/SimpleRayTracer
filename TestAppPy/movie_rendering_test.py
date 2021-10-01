@@ -73,8 +73,8 @@ test_dll.enable_direct_frame_buffer(buffer.ctypes.data_as(ctypes.POINTER(ctypes.
 r_conf = renderer_config(rendering_width=cols, 
                             rendering_height=rows, 
                             num_channels=3, 
-                            num_samples=3, 
-                            ray_max_depth=10,
+                            num_samples=1000, 
+                            ray_max_depth=20,
                             background=vec3(to_c_array_d([0.0, 0.0, 0.0])))
 
 #
@@ -132,7 +132,7 @@ t4 = texture()
 m4 = material()
 obj4 = object()
 
-test_dll.create_solid_color_texture(vec3(to_c_array_d([1.0, 0.7, 0.2])), ctypes.byref(t4))
+test_dll.create_solid_color_texture(vec3(to_c_array_d([1.0, 1.0, 1.0])), ctypes.byref(t4))
 test_dll.create_diffuse_light_material(t4, ctypes.byref(m4))
 test_dll.create_sphere_object(vec3(to_c_array_d([-0.5, 1.5, -1.0])), ctypes.c_double(1.0), ctypes.byref(obj4))
 test_dll.add_object(obj4, m4)
@@ -165,7 +165,7 @@ for i in tqdm(range(t_len*fps)):
 
     res = buffer.reshape(rows, cols, 3)
     cv2.imshow(window_name, res)
-    cv2.imwrite("tset.png", res)
+    #cv2.imwrite("tset.png", res)
     out.write(res)
     
     if cv2.waitKey(1) == 27:
